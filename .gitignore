@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# environment (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# coverage / reports
+coverage/
+lighthouse/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# local tooling
+.vscode/
+.idea/

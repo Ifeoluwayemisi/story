@@ -89,8 +89,18 @@ If a requirement conflicts with the architecture, stop and explain the conflict.
 
 Current status:
 
-PLANNING
+IMPLEMENTATION — PLANNING APPROVED
 
-Do not begin implementation until the user explicitly states:
+Planning is approved; implementation proceeds sequentially through `docs/implementation-plan.md`.
 
-PLANNING APPROVED
+Progress:
+
+- Phase 1 (project initialization) COMPLETE — frontend/ (Next.js 16) and backend/ (Node.js 22 native TS) scaffolded, both type-check/lint/build/test/format-green, CI at `.github/workflows/ci.yml`, environment-variable contract in `docs/environment.md` with `.env.example` templates (backend + frontend).
+- Phase 2 (frontend foundation) NEXT — layouts, tokens/themes (light+dark via `data-theme`), fonts (Fraunces/Karla/IBM Plex Mono), primitives, header/footer/skip-link. Design tokens were approved in planning.
+
+Rules that remain in force during implementation:
+
+- The approved architecture and design system are authoritative; do not redesign the product.
+- Never invent real content (projects, metrics, testimonials, employment history, contact info, achievements). Real content must come from the owner.
+- Development-only placeholders must be clearly marked and must never ship.
+- Do not commit secrets; use documented environment variables and `.env.example` without real credentials.
