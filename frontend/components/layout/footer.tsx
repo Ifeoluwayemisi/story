@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { isDevPlaceholderEnabled } from "@/lib/dev";
-
-const sitemap = [
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/writing", label: "Writing" },
-  { href: "/contact", label: "Contact" },
-] as const;
+import { contact, recruiter } from "@/lib/home-content";
+import { destinations } from "@/lib/navigation";
 
 export function Footer() {
   return (
@@ -23,7 +17,7 @@ export function Footer() {
 
           <nav aria-label="Footer">
             <ul className="flex flex-col gap-3">
-              {sitemap.map((item) => (
+              {destinations.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
@@ -37,13 +31,17 @@ export function Footer() {
           </nav>
 
           <div className="flex flex-col items-start gap-4">
-            {isDevPlaceholderEnabled ? (
-              // Dev-only placeholder — resume & contact channels ship after Phase 0
-              // content sign-off. Compile-time no-op in production builds.
-              <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-faint">
-                [DEV · channels &amp; resume pending content]
-              </p>
-            ) : null}
+            <p className="font-mono text-sm text-ink-muted">
+              <a
+                href={`mailto:${contact.email}`}
+                className="text-ink transition-colors duration-fast ease-brand hover:text-link"
+              >
+                {contact.email}
+              </a>
+            </p>
+            <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-faint">
+              Remote &amp; hybrid &middot; {recruiter.location}
+            </p>
             <ThemeToggle />
           </div>
         </div>

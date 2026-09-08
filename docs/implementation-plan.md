@@ -19,7 +19,7 @@
 2. For each flagship project: confirm live URL / public repo (or state "no public link"), screenshots/artifacts with alt text, and the full case-study narrative.
 3. Confirm personal facts open to publishing: location/remote/authorization/availability lines, contact channels, socials.
 4. **WhatsApp input (ADR-005):** supply the real, validated WhatsApp number; approve CTA copy ("Chat on WhatsApp" / "Chat with me"); approve optional generic prefilled opener (or ship the plain deep link). No placeholder is permitted.
-5. **Resend input (ADR-004):** create the Resend account, verify the sending domain, and provide the API key at the right time (supply credentials during Phase 8/13 — never committed to the repo).
+5. **Brevo input (ADR-004):** create the Brevo account, verify the sender, and provide the API key at the right time (supply credentials during Phase 8/13 — never committed to the repo).
 6. Approve the design-system tokens and the wordmark direction (see `docs/brand.md` §10) → gates Phase 2/3.
 
 **Dependencies:** none (input from Racheal).
@@ -178,17 +178,17 @@
 **Objective:** the conversion point + its backend.
 
 **Tasks (frontend):** contact route with dual form paths (role/build) + secondary **WhatsApp CTA** (Contact + footer); validated form client-side; success/failure/rate-limited states; direct channels; "what happens next"; accessible WhatsApp link (`aria-label`, external-app indication, deep link from Phase 0 number only — no placeholder).
-**Tasks (backend):** `POST /api/contact` endpoint — server validation, honeypot, rate limiting, explicit errors, structured logging; **`ContactDelivery` adapter interface with a `ResendDelivery` implementation** (ADR-004); env-only config (`RESEND_API_KEY`, sender/recipient vars); deployment config (env injection, HTTPS, headers).
+**Tasks (backend):** `POST /api/contact` endpoint — server validation, honeypot, rate limiting, explicit errors, structured logging; **`ContactDelivery` adapter interface with a `BrevoDelivery` implementation** (ADR-004); env-only config (`BREVO_API_KEY`, sender/recipient vars); deployment config (env injection, HTTPS, headers).
 
-**Dependencies:** Phase 1 (backend init) + Phase 4; Phase 0 WhatsApp/Resend inputs. **Expected files:** contact route + WhatsApp CTA; backend endpoint, delivery adapter (+ interface), tests; deploy config; env-var docs (see ADR-004).
+**Dependencies:** Phase 1 (backend init) + Phase 4; Phase 0 WhatsApp/Brevo inputs. **Expected files:** contact route + WhatsApp CTA; backend endpoint, delivery adapter (+ interface), tests; deploy config; env-var docs (see ADR-004).
 
-**Acceptance criteria:** full matrix of valid/invalid/oversized/rate-limited cases behaves per `docs/ux.md` §7; no secrets in frontend or repo; endpoint is the only backend route; a **test Resend send is verified**; the delivery adapter is proven swappable (mock/alternate implementation passes the same interface contract); WhatsApp deep link renders only with a validated number and meets a11y checks in Contact + footer.
+**Acceptance criteria:** full matrix of valid/invalid/oversized/rate-limited cases behaves per `docs/ux.md` §7; no secrets in frontend or repo; endpoint is the only backend route; a **test Brevo send is verified**; the delivery adapter is proven swappable (mock/alternate implementation passes the same interface contract); WhatsApp deep link renders only with a validated number and meets a11y checks in Contact + footer.
 
-**Testing:** backend unit/integration tests (validation, rate limit, error mapping, adapter contract); end-to-end submit against a Resend test sandbox then a real verified send; manual pass incl. WhatsApp link on mobile/desktop.
+**Testing:** backend unit/integration tests (validation, rate limit, error mapping, adapter contract); end-to-end submit against a Brevo sandbox/test setup then a real verified send; manual pass incl. WhatsApp link on mobile/desktop.
 
-**DoD:** contact works end-to-end securely via both channels (form → Resend → email; WhatsApp deep link); no placeholders ship.
+**DoD:** contact works end-to-end securely via both channels (form → Brevo → email; WhatsApp deep link); no placeholders ship.
 
-**Risks:** Resend domain verification/credentials handling → gated on Racheal's Phase 0/8 input (no committed secrets); spam tuning after launch (documented baseline).
+**Risks:** Brevo sender verification/credentials handling → gated on Racheal's Phase 0/8 input (no committed secrets); spam tuning after launch (documented baseline).
 
 ---
 
@@ -260,7 +260,7 @@
 
 **Objective:** ship to production.
 
-**Tasks:** static-site deploy config (CDN/static host) + backend deploy (env-only secrets, incl. `RESEND_API_KEY` + sender/recipient vars); **Resend production sender verified + test send confirmed**; HTTPS + security headers; analytics on contact (delivery + spam); broken-link scan (incl. WhatsApp deep link target); final Lighthouse/axe; content update runbook (how to add/edit MDX).
+**Tasks:** static-site deploy config (CDN/static host) + backend deploy (env-only secrets, incl. `BREVO_API_KEY` + sender/recipient vars); **Brevo production sender verified + test send confirmed**; HTTPS + security headers; analytics on contact (delivery + spam); broken-link scan (incl. WhatsApp deep link target); final Lighthouse/axe; content update runbook (how to add/edit MDX).
 
 **Dependencies:** Phases 10–12. **Expected files:** deployment config, runbook (docs).
 

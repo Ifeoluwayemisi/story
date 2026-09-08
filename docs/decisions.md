@@ -9,7 +9,7 @@
 | ADR-001 | Static-first portfolio architecture | Accepted |
 | ADR-002 | Backend limited to contact functionality | Accepted |
 | ADR-003 | No database / CMS / content API in v1 (+ revival condition) | Accepted |
-| ADR-004 | Contact delivery via Resend (behind a delivery adapter) | Accepted |
+| ADR-004 | Contact delivery via Brevo (behind a delivery adapter) | Accepted |
 | ADR-005 | WhatsApp direct contact path (frontend-only, secondary CTA) | Accepted |
 
 ---
@@ -95,7 +95,7 @@ It owns:
 - **Validation** — re-validates all external input server-side (required fields, format — email, lengths, allowed values) independent of client-side checks; rejects malformed/oversized payloads explicitly.
 - **Abuse protection** — rate limiting per client (sliding-window per IP, with consideration for shared-NAT false positives), a honeypot field, request size limits, and basic heuristics (e.g., min content sanity).
 - **Explicit error handling** — structured success/failure responses; no internal error strings or stack traces leak to the client.
-- **Delivery coordination** — forwards a sanitized, validated message to the delivery provider via the **delivery adapter** (interface in the backend; Resend implementation in v1 — see ADR-004), using server-side-only credentials.
+- **Delivery coordination** — forwards a sanitized, validated message to the delivery provider via the **delivery adapter** (interface in the backend; Brevo implementation in v1 — see ADR-004), using server-side-only credentials.
 - **Observability** — server-side logging of submissions (without storing message content longer than needed) to track spam rates and delivery failures.
 
 ### What the backend does NOT own
@@ -197,10 +197,11 @@ The decision to introduce persistent content infrastructure (headless CMS, datab
 
 ---
 
-## ADR-004 — Contact delivery via Resend (behind a delivery adapter)
+## ADR-004 — Contact delivery via Brevo (behind a delivery adapter)
 
 **Date:** 2026-09 (planning phase)
 **Status:** Accepted
+**Change:** the original planning choice of **Resend** as the v1 provider was replaced by **Brevo** (owner-approved, checkpoint before Phase 8). The decision's architectural substance is unchanged: provider abstraction, backend-owned delivery, no contact-message database, env-only credentials, and easy future provider replacement all still hold. What changed is only the named provider implementation.
 
 ### Context
 
@@ -208,8 +209,8 @@ The contact form (ADR-002) must deliver validated messages to Racheal's email. D
 
 ### Decision
 
-- Use **Resend** as the email delivery provider for the contact form in v1.
-- Introduce a **delivery adapter / interface** in the backend: the contact endpoint talks to a `ContactDelivery` interface; a **ResendDelivery** implementation is the only provider implementation in v1.
+- Use **Brevo** as the email delivery provider for the contact form in v1.
+- Introduce a **delivery adapter / interface** in the backend: the contact endpoint talks to a `ContactDelivery` interface; a **BrevoDelivery** implementation is the only provider implementation in v1.
 - **No database** is introduced for delivery (no message persistence).
 
 ### Delivery flow
@@ -218,7 +219,7 @@ The contact form (ADR-002) must deliver validated messages to Racheal's email. D
 POST /api/contact (validated input)
     → rate limit / honeypot checks
     → ContactDelivery.send(...)          (interface)
-    → ResendDelivery (Resend API, env-only API key)
+    → BrevoDelivery (Brevo API, env-only API key)
     → Racheal's inbox
 ```
 
@@ -226,8 +227,8 @@ POST /api/contact (validated input)
 
 | Variable | Purpose | Notes |
 |---|---|---|
-| `RESEND_API_KEY` | Resend API authentication | **Never** exposed to the frontend; injected at deploy |
-| `CONTACT_FROM_EMAIL` | Sender address (Resend-verified domain) | Must be on a verified Resend sending domain / authorized sender |
+| `BREVO_API_KEY` | Brevo API authentication | **Never** exposed to the frontend; injected at deploy |
+| `CONTACT_FROM_EMAIL` | Sender address (Brevo-verified sender) | Must be a verified Brevo sender / authorized sender |
 | `CONTACT_FROM_NAME` | Sender display name (e.g., "Racheal Portfolio") | Optional but recommended |
 | `CONTACT_TO_EMAIL` | Racheal's receiving inbox | The delivery target |
 
@@ -235,19 +236,19 @@ Optional, if set at implementation: `CONTACT_RATE_LIMIT_*` tuning values. No var
 
 ### Sender/domain verification requirements
 
-- The `CONTACT_FROM_EMAIL` domain must be **verified in Resend** (DNS records confirmed by Racheal during Phase 8 / Phase 13 deployment).
-- Until verified, test sends against a sandbox/test address; production sending is not enabled on unverified senders.
-- Uses Resend's **from-address / recipient allow-list** behavior appropriately (single-person portfolio: one verified sender, one recipient).
+- The `CONTACT_FROM_EMAIL` sender must be **verified in Brevo** (DNS/sender verification confirmed by Racheal during Phase 8 / Phase 13 deployment).
+- Until verified, test sends go against a sandbox/test setup; production sending is not enabled on unverified senders.
+- Uses Brevo's **sender allow-list / verified-sender** behavior appropriately (single-person portfolio: one verified sender, one recipient).
 
 ### Failure handling
 
-- Resend errors are **mapped, not leaked** — the endpoint returns an explicit, safe error to the visitor (no Stack traces, no provider error bodies, no secrets).
+- Brevo errors are **mapped, not leaked** — the endpoint returns an explicit, safe error to the visitor (no Stack traces, no provider error bodies, no secrets).
 - Delivery outcome (sent / rejected / provider error) is **logged server-side** for monitoring; message body is not stored beyond the provider's own delivery lifecycle.
 - Frontend shows a clear failure state with a direct-channel fallback (see ADR-005).
 
 ### Security considerations
 
-- `RESEND_API_KEY` is an env var **server-side only**; never in frontend code, build output, or the repo.
+- `BREVO_API_KEY` is an env var **server-side only**; never in frontend code, build output, or the repo.
 - The adapter is the **only** outbound integration beyond the delivery provider; minimal attack surface maintained (single contact endpoint).
 - Rate limiting + honeypot apply before any delivery call (ADR-002); provider calls happen only after input passes validation.
 - Dependencies pinned and audited; HTTPS end-to-end.
@@ -255,7 +256,7 @@ Optional, if set at implementation: `CONTACT_RATE_LIMIT_*` tuning values. No var
 ### Consequences
 
 - Swapping providers later means implementing a new `ContactDelivery` implementation — the endpoint, validation, and UX are unchanged.
-- Resend account, domain verification, and API key are Phase 0 / Phase 8 operational inputs (Racheal supplies the key + verified domain; **no values are invented or committed**).
+- Brevo account, sender verification, and API key are Phase 0 / Phase 8 operational inputs (Racheal supplies the key + verified sender; **no values are invented or committed**).
 - No messages are persisted anywhere owned by us in v1.
 
 ---
@@ -299,7 +300,7 @@ Visitors may prefer a direct, immediate chat channel. A second contact channel �
 ### Contact path summary (final)
 
 ```
-Contact form:  Next.js → Node/TS backend → validation + honeypot/rate limiting → Resend adapter → email
+Contact form:  Next.js → Node/TS backend → validation + honeypot/rate limiting → Brevo adapter → email
 Direct chat:   Next.js → WhatsApp deep link → direct conversation
 ```
 

@@ -1,60 +1,67 @@
 # Racheal — Developer Portfolio
 
-Personal developer portfolio of **Olayode Racheal**. A static-first, evidence-led site that demonstrates how she thinks, builds, and communicates — product-minded full-stack engineering with strong fundamentals.
+Personal developer portfolio of **Olayode Racheal**: a static-first, evidence-led site that demonstrates how she thinks, builds, and communicates — product-minded full-stack engineering with strong fundamentals.
 
 ## Status
 
-**Planning phase.** This repository currently contains planning documents only — architecture, brand, design system, UX, content model, implementation plan, and a decision log. **No application code exists yet** and none will be written until the user approves the plan (see `AGENTS.md`).
+Phases 1–7 of the approved implementation plan are complete (`AGENTS.md` records the per-phase progress). The portfolio's main content surfaces are implemented and validated. **Phase 8 (contact form + backend) is next**, per `docs/implementation-plan.md`.
 
-## Architecture (approved)
+## Stack
 
-- **Frontend:** Next.js + TypeScript (App Router), rendering statically from **MDX + structured repo data**. No content database, CMS, or content API in v1.
-- **Backend:** Node.js + TypeScript, limited to what genuinely requires server-side processing — the **validated contact endpoint** (validation, honeypot/rate limiting, delivery via a **Resend adapter**). Frontend and backend remain fully separated.
-- **Direct contact:** a secondary **WhatsApp** deep-link path (frontend-only, no backend) complements the contact form.
-- The full reasoning, alternatives, and the conditions that would justify introducing content infrastructure later are recorded in `docs/decisions.md`.
+- **Frontend:** Next.js 16 + TypeScript (App Router). Content is rendered statically from typed, repo-first data modules — no database, CMS, or content API in v1.
+- **Backend:** Node.js 22 + TypeScript, scaffolded and kept separate from the frontend. In v1 its only job will be the validated contact endpoint (email delivery through a swappable provider adapter).
 
-## Planning-first approach
+## Implemented sections
 
-Every implementation change must:
+- **Home** (`/`) — hero + recruiter facts, Selected Work grid, "Now" band, evidence, About preview, writing teaser, contact CTA.
+- **Work** (`/work`) — project index.
+- **Case studies** (`/work/[slug]`) — SabiGet, Alafia, Lumora, MyGuestly AI.
+- **About** (`/about`) — journey, achievements, evidence-linked skills, working principles, recruiter facts.
+- **Writing** (`/writing`) — notes/articles index; internal post template at `/writing/[slug]`.
+- Design-system foundation — token-driven light/dark themes, primitives + UI components, accessible navigation with a mobile menu, and a dev-only component review surface at `/components` (404 in production).
 
-1. Follow the documentation in `/docs`.
-2. Respect the approved architecture (`docs/decisions.md`, `docs/architecture.md`).
-3. Avoid unnecessary dependencies and unapproved architecture.
+Content is authored in typed source-of-truth modules under `frontend/lib/` (`home-content.ts`, `work-content.ts`, `about-content.ts`, `writing-content.ts`). Nothing is invented: material not yet supplied by the owner is omitted, never placeholder-shipped.
 
-The design rules in `docs/brand.md` and `docs/design-system.md` are authoritative.
-
-## Repository structure
+## Repository layout
 
 ```
-AGENTS.md                  AI development instructions (rules + status)
-README.md                  this file
-docs/
-  vision.md                purpose, positioning, principles
-  brand.md                 brand identity + wordmark direction
-  requirements.md          product requirements (pages, features, budgets)
-  information-architecture.md   sitemap, navigation, URLs
-  design-system.md         authoritative visual tokens & components
-  ux.md                    behavior, journeys, flows
-  content-model.md         authoring schema + content readiness checklist
-  architecture.md          static-first system view
-  decisions.md             ADR decision log + revival condition
-  seo.md                   metadata, sitemap, structured data
-  implementation-plan.md   phased roadmap to production
-frontend/                  (future) Next.js + TypeScript
-backend/                   (future) Node.js + TypeScript contact service
+AGENTS.md    AI development instructions (rules + status)
+backend/     Node.js + TypeScript contact service (scaffold)
+docs/        planning + architecture documentation (authoritative)
+frontend/    Next.js + TypeScript portfolio
 ```
 
-## Content strategy
+Planning, architecture, and design documentation live in `docs/` and are authoritative for implementation.
 
-- Content is authored **in-repo** as MDX + structured data — edited with a text editor, rendered statically at build time.
-- **Evidence over claims:** projects and case studies must demonstrate real problems, decisions, trade-offs, and outcomes. Metrics are never invented.
-- **Quality over volume:** Writing is one publishing surface; one excellent post beats five weak ones.
-- All real material Racheal must supply before implementation is listed in the **content readiness checklist** in `docs/content-model.md`.
+## Local development
 
-## How implementation will work
+Requires Node.js ≥ 22.
 
-When the plan is approved (`PLANNING APPROVED`), work proceeds through the phases in `docs/implementation-plan.md` — from project initialization and the design-system build-out, through content infrastructure and the pages, to the contact backend, SEO, testing, and deployment. No phase is started without its defined acceptance criteria and definition of done.
+Frontend (`frontend/`):
 
-## Contributing / changes
+```sh
+npm install
+npm run dev            # dev server
+npm run build          # production build
+npm run start          # serve the production build
+npm run lint           # eslint
+npm run typecheck      # tsc --noEmit
+npm run format:check   # prettier check
+```
 
-This is a personal project. Structural or architectural changes require an explicit approval: follow `AGENTS.md`'s planning-first and change-management rules, and record decisions in `docs/decisions.md`.
+Backend (`backend/`):
+
+```sh
+npm install
+npm run dev            # dev server (http://localhost:3001)
+npm run build          # tsc build
+npm run start          # run dist/server.js
+npm run lint
+npm run typecheck
+npm test               # node --test
+npm run format:check
+```
+
+## Environment
+
+Environment variables are documented in `docs/environment.md`; `backend/.env.example` and `frontend/.env.example` are committed templates with safe placeholders. Real values live only in git-ignored `.env`/`.env.local` or the deployment platform's environment — never in the repository.

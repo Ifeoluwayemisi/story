@@ -4,7 +4,7 @@ Single source of truth for every environment variable in this project across loc
 development and production. Read this before adding, removing, or renaming any
 environment variable.
 
-Related decisions: `docs/decisions.md` (ADR-004 contact delivery via Resend,
+Related decisions: `docs/decisions.md` (ADR-004 contact delivery via Brevo,
 ADR-005 WhatsApp as content), `docs/content-model.md` (contact site-config),
 `docs/implementation-plan.md` (deployment, Phase 13).
 
@@ -16,7 +16,7 @@ into exactly one of three classes. They have different rules.
 ### Secrets
 
 Credentials that grant access (API keys, passwords, tokens, private server
-credentials). The Resend API key (`RESEND_API_KEY`) is in this class; any future
+credentials). The Brevo API key (`BREVO_API_KEY`) is in this class; any future
 private server credentials will be too.
 
 Rules:
@@ -72,10 +72,10 @@ Read from the backend process environment at runtime. Backend: `backend/`.
 | Variable | Purpose | Required | Dev / Prod | Secret? | Example | Consumed | Deploy config |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `PORT` | HTTP port the server listens on | Optional (default `3001`) | Dev: default ok. Prod: set only if the platform does not inject it | No | `3001` | `backend/src/server.ts` | Set if your host does not provide its own port |
-| `RESEND_API_KEY` | Resend API key authorizing contact-email delivery (ADR-004) | Required in production; contact disabled without it | Dev: real test key or omit (contact off). Prod: required | **Yes** | `re_xxxxxxxxxxxxxxxxx` | `backend` ContactDelivery/Resend adapter (Phase 8) | Must be injected at deploy (secret store); never a repo value |
-| `CONTACT_FROM_EMAIL` | Sender address; must belong to a verified Resend sending domain | Required to send | Dev: Resend sandbox sender. Prod: verified-domain address | Not a secret (appears in outgoing mail), but server-side config | `hello@example.com` | same Resend adapter (Phase 8) | Set at deploy |
-| `CONTACT_FROM_NAME` | Sender display name on outgoing contact email | Optional, recommended | Dev / Prod | No | `Your Name` | same Resend adapter (Phase 8) | Optional |
-| `CONTACT_TO_EMAIL` | Delivery target — Racheal's inbox | Required to send | Dev / Prod | Personal (private), keep server-side | `you@example.com` | same Resend adapter (Phase 8) | Set at deploy; real value from Racheal Phase 0 |
+| `BREVO_API_KEY` | Brevo API key authorizing contact-email delivery (ADR-004) | Required in production; contact disabled without it | Dev: real key or omit (contact off). Prod: required | **Yes** | `xkeysib-xxxxxxxxxxxx` | `backend` ContactDelivery/Brevo adapter (Phase 8) | Must be injected at deploy (secret store); never a repo value |
+| `CONTACT_FROM_EMAIL` | Sender address; must be a verified Brevo sender | Required to send | Dev: Brevo sandbox sender. Prod: verified-sender address | Not a secret (appears in outgoing mail), but server-side config | `hello@example.com` | same Brevo adapter (Phase 8) | Set at deploy |
+| `CONTACT_FROM_NAME` | Sender display name on outgoing contact email | Optional, recommended | Dev / Prod | No | `Your Name` | same Brevo adapter (Phase 8) | Optional |
+| `CONTACT_TO_EMAIL` | Delivery target — Racheal's inbox | Required to send | Dev / Prod | Personal (private), keep server-side | `you@example.com` | same Brevo adapter (Phase 8) | Set at deploy; real value from Racheal Phase 0 |
 | `CONTACT_RATE_LIMIT_*` | Optional rate-limit tuning for the contact endpoint (ADR-002/004) | Optional, deferred to Phase 8 | Dev / Prod | No | n/a (decide at implementation) | `backend` contact router (Phase 8) | Optional |
 
 ## Frontend variables
@@ -111,10 +111,10 @@ not env.
 | Variable | Consumer |
 | --- | --- |
 | `PORT` | `backend/src/server.ts` |
-| `RESEND_API_KEY` | `backend` Resend delivery adapter (Phase 8) |
-| `CONTACT_FROM_EMAIL` | `backend` Resend delivery adapter (Phase 8) |
-| `CONTACT_FROM_NAME` | `backend` Resend delivery adapter (Phase 8) |
-| `CONTACT_TO_EMAIL` | `backend` Resend delivery adapter (Phase 8) |
+| `BREVO_API_KEY` | `backend` Brevo delivery adapter (Phase 8) |
+| `CONTACT_FROM_EMAIL` | `backend` Brevo delivery adapter (Phase 8) |
+| `CONTACT_FROM_NAME` | `backend` Brevo delivery adapter (Phase 8) |
+| `CONTACT_TO_EMAIL` | `backend` Brevo delivery adapter (Phase 8) |
 | `NEXT_PUBLIC_CONTACT_API_URL` | `frontend` contact form (Phase 8) |
 | WhatsApp number | `frontend` site-content/config (Phase 4+), rendered in contact CTA |
 
@@ -123,7 +123,7 @@ not env.
 | Variable | Local dev | Production |
 | --- | --- | --- |
 | `PORT` | optional (default `3001`) | optional (host-injected or set) |
-| `RESEND_API_KEY` | optional (contact off without it) | required |
+| `BREVO_API_KEY` | optional (contact off without it) | required |
 | `CONTACT_FROM_EMAIL` | optional | required |
 | `CONTACT_FROM_NAME` | optional | optional |
 | `CONTACT_TO_EMAIL` | optional | required |

@@ -2,20 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { destinations } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 
-const destinations = [
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/writing", label: "Writing" },
-  { href: "/contact", label: "Contact" },
-] as const;
+export interface NavLinksProps {
+  orientation?: "row" | "column";
+}
 
-export function NavLinks() {
+export function NavLinks({ orientation = "row" }: NavLinksProps) {
   const pathname = usePathname();
 
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-7">
+    <ul
+      className={cn(
+        "flex items-center",
+        orientation === "row" && "flex-wrap gap-x-4 gap-y-1 sm:gap-x-7",
+        orientation === "column" && "flex-col items-stretch gap-1",
+      )}
+    >
       {destinations.map(({ href, label }) => {
         const active = pathname === href;
         return (
@@ -24,8 +28,10 @@ export function NavLinks() {
               href={href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "group relative inline-flex items-center gap-1.5 py-2 text-sm",
+                "group relative inline-flex items-center gap-1.5",
                 "transition-colors duration-fast ease-brand",
+                orientation === "row" && "py-2 text-sm",
+                orientation === "column" && "w-full py-3 text-body-lg",
                 active ? "font-medium text-ink" : "text-ink-muted hover:text-ink",
               )}
             >
@@ -36,7 +42,8 @@ export function NavLinks() {
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute inset-x-0 -bottom-0.5 h-px transition-colors duration-fast",
+                  "absolute inset-x-0 h-px transition-colors duration-fast",
+                  orientation === "row" ? "-bottom-0.5" : "bottom-0.5",
                   active ? "bg-link" : "bg-transparent group-hover:bg-border-strong",
                 )}
               />

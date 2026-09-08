@@ -237,7 +237,7 @@
 
 **Two distinct contact channels (approved):**
 
-1. **Contact form (primary)** — role / build paths via the validated form → Node/TS backend → Resend → Racheal's email.
+1. **Contact form (primary)** — role / build paths via the validated form → Node/TS backend → Brevo → Racheal's email.
 2. **Direct WhatsApp (secondary)** — `wa.me` deep link → direct conversation. **No backend involved.** See `docs/decisions.md` ADR-005.
 
 **Structure (form channel):**
@@ -254,9 +254,9 @@
 - The number is a **real value Racheal provides in Phase 0** (see `docs/content-model.md` readiness checklist). No placeholder may be hardcoded or ship; the link stays disabled until verified.
 - Any prefilled WhatsApp message uses only **approved, generic, non-personal copy** (documented strategy in ADR-005); without approved copy, ship the plain deep link with no preview text.
 
-**Backend requirement (per approved architecture):** the form submits to the **Node/TS backend** (validated endpoint), **never** a client-only handler with keys in the frontend. The contact form is the primary justification for the backend in v1. Delivery goes through a **delivery adapter interface** behind which **Resend** implements email sending (ADR-004). WhatsApp requires no backend.
+**Backend requirement (per approved architecture):** the form submits to the **Node/TS backend** (validated endpoint), **never** a client-only handler with keys in the frontend. The contact form is the primary justification for the backend in v1. Delivery goes through a **delivery adapter interface** behind which **Brevo** implements email sending (ADR-004). WhatsApp requires no backend.
 
-**Resend / delivery requirements (ADR-004):** backend-only env vars (`RESEND_API_KEY`, sender + recipient config); sender domain verified in Resend before production sending; provider errors mapped to safe user-facing errors (no leaked internals); delivery logged server-side; no message persistence.
+**Brevo / delivery requirements (ADR-004):** backend-only env vars (`BREVO_API_KEY`, sender + recipient config); sender verified in Brevo before production sending; provider errors mapped to safe user-facing errors (no leaked internals); delivery logged server-side; no message persistence.
 
 **Acceptance criteria:**
 - Submission is validated (format, length, required fields) with clear inline errors.
@@ -264,7 +264,7 @@
 - No API keys/credentials reach the frontend; env vars server-side only.
 - Confirmation state shown on success/failure; accessible to assistive tech.
 - Spam/abuse mitigated (rate limiting / honeypot — see Security).
-- A demo/targeted Resend send is verified in a test environment before launch.
+- A demo/targeted Brevo send is verified in a test environment before launch.
 - WhatsApp CTA: present in Contact **and** one other approved location; accessible; no floating widget; deep link built from the Phase 0 number — never a shipped placeholder.
 
 ---
@@ -341,7 +341,7 @@
 | Feature | Why it exists | Who benefits | Priority | Complexity |
 |---|---|---|---|---|
 | **Validated contact form (backend)** | Primary conversion; secure, role vs project distinction; main justification for the backend | Recruiters, clients | P0 | Medium–High |
-| **Resend delivery adapter (backend)** | Email delivery behind an interface; provider not coupled to the app; env-only credentials (ADR-004) | Racheal | P0 | Low–Medium |
+| **Brevo delivery adapter (backend)** | Email delivery behind an interface; provider not coupled to the app; env-only credentials (ADR-004) | Racheal | P0 | Low–Medium |
 | **WhatsApp direct chat (frontend only)** | Secondary, low-friction direct contact path; no backend involved (ADR-005) | Recruiters, clients | P1 | Low |
 | **Manual light/dark theme toggle** | User control + distinctive dark mode; explicit choice (anti-auto) | All visitors | P0 | Low–Medium |
 | **Subtle scroll-reveal / entrance motion (a11y-aware)** | Delight + focus; respects reduced-motion | All | P1 | Low |
@@ -387,7 +387,7 @@ Rejected because they sound impressive but don't improve the portfolio (aligning
 - F1: Serve all pages: Home, Work, Case Studies, About/Journey, Writing, Contact.
 - F2: Portfolio content is **static** — authored as MDX / structured repo data and rendered by the frontend (no database, content API, CMS, or ingestion pipeline).
 - F3: Contact form with dual path (role/project), full validation + inline errors, success/failure states, backend handling — the primary backend use case.
-- F3a: Contact delivery via a **delivery adapter interface**, implemented by **Resend** (ADR-004); env-only credentials; sender domain verified; provider errors mapped to safe responses.
+- F3a: Contact delivery via a **delivery adapter interface**, implemented by **Brevo** (ADR-004); env-only credentials; sender verified; provider errors mapped to safe responses.
 - F3b: **WhatsApp** direct chat CTA (secondary) in Contact and at least one other approved location; accessible, no floating widget; deep link built from the Phase 0 number only (ADR-005).
 - F4: Manual light/dark theme toggle, persisted.
 - F5: **PDF resume download** (first-class deliverable, brand-consistent).
@@ -438,7 +438,7 @@ Rejected because they sound impressive but don't improve the portfolio (aligning
 ## SECURITY REQUIREMENTS
 
 - **No secrets in the frontend.** API keys, tokens, DB credentials, and private env vars exist **only** server-side (backend).
-- **Delivery credentials (e.g., `RESEND_API_KEY`):** backend env vars only; never in the frontend, build output, or repo; sender domain verified in Resend before production sending (ADR-004).
+- **Delivery credentials (e.g., `BREVO_API_KEY`):** backend env vars only; never in the frontend, build output, or repo; sender verified in Brevo before production sending (ADR-004).
 - **WhatsApp needs no backend** — it is a frontend deep link; no provider credentials exist for it (ADR-005).
 - Contact endpoint **validates all external input**; rejects malformed/oversized payloads.
 - **Explicit error handling**; no internal errors or stack traces leaked to the client.

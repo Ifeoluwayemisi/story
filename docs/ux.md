@@ -122,7 +122,7 @@ A structured long-form narrative with a consistent editored layout:
 1. **Landing:** the two in-form paths presented clearly — **"I have a role"** / **"Let's build together"** — each with a one-line description of what happens next.
 2. **Form:** the chosen path pre-fills/sets the message context (`context` field). Fields: name, email, optional context/interest, message.
 3. **Client-side pre-validation:** format/length/required with **inline errors** and a summary for screen readers.
-4. **Submission → backend → delivery:** fetch to the backend contact endpoint (`POST`) → validation + honeypot/rate limiting → **`ContactDelivery` adapter → Resend → email** (ADR-004). No secrets in frontend (ADR-002/ADR-004).
+4. **Submission → backend → delivery:** fetch to the backend contact endpoint (`POST`) → validation + honeypot/rate limiting → **`ContactDelivery` adapter → Brevo → email** (ADR-004). No secrets in frontend (ADR-002/ADR-004).
 5. **States:**
    - *Submitting:* button disabled + "Sending…" (aria-live polite).
    - *Success:* clear confirmation ("Message sent — I'll reply within <X days>") in a `role="status"` region; form clears.

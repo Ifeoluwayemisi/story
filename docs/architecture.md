@@ -40,7 +40,7 @@
                        │               │   (adapter)
                        │               ▼
                        │        ┌──────────────┐
-                       │        │   Resend     │──► to Racheal's email
+                       │        │   Brevo     │──► to Racheal's email
                        └────────┴──────────────┘   (no DB in v1)
 ```
 
@@ -60,9 +60,9 @@
 
 - **Scope in v1:** limited to functionality that genuinely requires server-side processing.
 - **Primary use case:** the **validated contact endpoint** (accepts the contact form, validates all external input, handles errors explicitly, mitigates spam, and coordinates delivery without exposing secrets to the frontend).
-- **Delivery:** the endpoint depends on a **`ContactDelivery` adapter interface**; `ResendDelivery` (via **Resend**) is the v1 implementation — the endpoint is not coupled to the provider (ADR-004).
+- **Delivery:** the endpoint depends on a **`ContactDelivery` adapter interface**; `BrevoDelivery` (via **Brevo**) is the v1 implementation — the endpoint is not coupled to the provider (ADR-004).
 - **No database, no full content API, no CMS, no content ingestion pipeline** in v1.
-- **Security:** env vars and credentials live server-side only (including `RESEND_API_KEY`); minimal attack surface (single contact endpoint).
+- **Security:** env vars and credentials live server-side only (including `BREVO_API_KEY`); minimal attack surface (single contact endpoint).
 
 ## WhatsApp (frontend-only secondary channel)
 
@@ -82,7 +82,7 @@
 
 1. Visitor submits the contact form.
 2. Frontend validates client-side and sends a validated request to the **backend contact endpoint**.
-3. Backend validates again, applies rate limiting/honeypot, and calls the **`ContactDelivery` adapter** (Resend in v1).
+3. Backend validates again, applies rate limiting/honeypot, and calls the **`ContactDelivery` adapter** (Brevo in v1).
 4. Returns an explicit success/failure state; **no secrets reach the frontend**; provider errors are mapped, never leaked.
 
 ## Data flow (WhatsApp — frontend only)

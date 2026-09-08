@@ -23,6 +23,7 @@
   --brand-primary: #5b2a86;
   --interactive: #6d3fa8;
   --interactive-hover: #4a1d68;
+  --interactive-active: #3a1650;
   --link: #6d3fa8;
   --link-hover: #7e4fc2;
 
@@ -33,6 +34,7 @@
   --on-brand: #ffffff;
 
   /* Derived */
+  --control-fill: var(--paper);
   --focus-ring: var(--interactive);
   --tag-bg: #e9e0f4;
   --tag-ink: #3a1650;
@@ -61,6 +63,7 @@
   --brand-primary: #5b2a86;
   --interactive: #6d3fa8;
   --interactive-hover: #7e4fc2;
+  --interactive-active: #7e4fc2;
   --link: #b79ae0;
   --link-hover: #e0d2f5;
 
@@ -69,6 +72,7 @@
   --accent-tint: #3a2238;
 
   --focus-ring: var(--link);
+  --control-fill: var(--surface);
   --tag-bg: var(--surface-2);
   --tag-ink: var(--ink);
   --elevated-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -100,6 +104,7 @@
   --color-accent-tint: var(--accent-tint);
   --color-on-brand: var(--on-brand);
   --color-focus-ring: var(--focus-ring);
+  --color-control-fill: var(--control-fill);
   --color-tag-bg: var(--tag-bg);
   --color-tag-ink: var(--tag-ink);
   --color-success: var(--success);
@@ -125,22 +130,25 @@
   --text-display-xl--letter-spacing: -0.02em;
   --text-display-lg: clamp(2.25rem, 5vw, 3.5rem);
   --text-display-lg--line-height: 1.1;
-  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--letter-spacing: -0.015em;
   --text-display: clamp(1.875rem, 4vw, 2.75rem);
-  --text-display--line-height: 1.15;
+  --text-display--line-height: 1.1;
   --text-display--letter-spacing: -0.01em;
   --text-h2: clamp(1.5rem, 3vw, 2rem);
-  --text-h2--line-height: 1.2;
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.01em;
   --text-h3: clamp(1.25rem, 2.5vw, 1.5rem);
-  --text-h3--line-height: 1.3;
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.005em;
   --text-h4: 1.125rem;
-  --text-h4--line-height: 1.4;
+  --text-h4--line-height: 1.3;
   --text-body-lg: 1.125rem;
   --text-body-lg--line-height: 1.7;
   --text-body: 1rem;
   --text-body--line-height: 1.65;
   --text-meta: 0.8125rem;
   --text-meta--line-height: 1.5;
+  --text-meta--letter-spacing: 0.02em;
   --text-label: 0.75rem;
   --text-label--line-height: 1.4;
   --text-label--letter-spacing: 0.12em;
@@ -208,6 +216,102 @@
   ::selection {
     background-color: var(--accent-tint);
   }
+
+  hr {
+    border-color: var(--border);
+  }
+}
+
+/* Article / case-study prose (docs/design-system.md §6) — composed from tokens. */
+@layer components {
+  .prose-body {
+    max-width: 70ch;
+  }
+
+  .prose-body > :first-child {
+    margin-top: 0;
+  }
+
+  .prose-body :is(p, ul, ol, blockquote, pre, figure) {
+    margin-top: 1.5rem;
+  }
+
+  .prose-body a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: color 120ms var(--ease-brand);
+  }
+
+  .prose-body a:hover {
+    color: var(--link-hover);
+  }
+
+  .prose-body strong {
+    color: var(--ink);
+  }
+
+  .prose-body ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .prose-body ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .prose-body li {
+    margin-top: 0.5rem;
+    padding-left: 0.375rem;
+  }
+
+  .prose-body li::marker {
+    color: var(--accent);
+  }
+
+  .prose-body blockquote {
+    border-left: 1px solid var(--border-strong);
+    padding-left: 1.25rem;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+
+  .prose-body :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.125rem 0.375rem;
+  }
+
+  .prose-body img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Mobile nav progressive enhancement (docs/ux.md §1).
+   Without JS the inline top-bar nav stays visible at every width (fallback, no
+   orphaned navigation); once JS mounts, html.nav-js collapses it into the
+   accessible sheet below lg and reveals the labelled menu button. */
+.nav-menu-button {
+  display: none;
+}
+
+.nav-js .nav-menu-button {
+  display: inline-flex;
+}
+
+@media (max-width: 63.99875rem) {
+  .nav-js .nav-inline-desktop {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,5 +322,57 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Print (docs/brand.md §8 — monochrome fidelity): single-color, ink-friendly.
+   Interactive chrome disappears; text is black on transparent (white) with
+   hairline rules; the layout falls back to the reading column only. */
+@media print {
+  header nav,
+  header button,
+  footer nav,
+  footer button,
+  .nav-inline-desktop,
+  .nav-menu-button,
+  #mobile-nav-panel,
+  a[href="#main-content"] {
+    display: none !important;
+  }
+
+  header {
+    position: static !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a {
+    text-decoration-color: #999999;
+  }
+
+  *,
+  *::before,
+  *::after {
+    border-color: #c9c2cf !important;
+  }
+
+  .container-page {
+    max-width: 100%;
+    padding-inline: 0;
+  }
+
+  img {
+    max-width: 100%;
   }
 }
