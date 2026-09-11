@@ -1,0 +1,25 @@
+/* Resume document — screen composition uses the design-system utility classes.
+   This file holds only resume-specific rules the utilities don't cover: the
+   print-friendly toolbar/PDF hint bar and monochrome print refinements
+   (docs/brand.md §8, docs/design-system.md §6). */
+
+@media print {
+  .resume-toolbar {
+    display: none !important;
+  }
+
+  .resume-document {
+    border: 0 !important;
+  }
+
+  .resume-section {
+    break-inside: avoid;
+  }
+
+  .resume-document a[href^="/"]::after {
+    content: " (" attr(href) ")";
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    color: inherit;
+  }
+}

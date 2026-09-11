@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WhatsAppLink } from "@/components/contact/whatsapp-link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { contact, recruiter } from "@/lib/home-content";
 import { destinations } from "@/lib/navigation";
@@ -27,6 +28,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/resume"
+                  className="text-sm text-ink-muted transition-colors duration-fast ease-brand hover:text-ink"
+                >
+                  Resume
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -39,6 +48,7 @@ export function Footer() {
                 {contact.email}
               </a>
             </p>
+            <WhatsAppLink />
             <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-faint">
               Remote &amp; hybrid &middot; {recruiter.location}
             </p>

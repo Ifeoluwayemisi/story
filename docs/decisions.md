@@ -89,7 +89,7 @@ The contact form is the site's primary conversion point (dual path: "I have a ro
 
 ### What the backend owns
 
-Exactly one endpoint in v1: **`POST /api/contact`** (shape/route name decided at implementation).
+Exactly one endpoint in v1: **`POST /api/contact`** (implemented in Phase 8 as `POST /api/contact` on the Node backend; only `POST` is allowed — other methods return `405` with `Allow: POST`).
 
 It owns:
 - **Validation** — re-validates all external input server-side (required fields, format — email, lengths, allowed values) independent of client-side checks; rejects malformed/oversized payloads explicitly.
@@ -113,7 +113,7 @@ It owns:
 
 ### Rate limiting / abuse protection
 
-- Per-client rate limit (e.g., an IP/time-window cap with a documented ceiling chosen at implementation based on expected traffic) plus a honeypot field an automated bot will fill.
+- Per-client rate limit: **sliding window, 60 s, max 10 requests / IP**, max 10,000 tracked keys with a periodic sweep (implemented as compile-time constants in `backend/src/contact/rate-limit.ts` — no tuning env var), plus a honeypot field an automated bot will fill.<br>**As built (Phase 8):** rate limiting is applied after JSON parsing and before validation/delivery; IPs are hashed (SHA-256, 16-hex prefix) in logs and never stored in full; the `429` response carries `Retry-After`.
 - Requests exceeding limits get an explicit, still-usable response (not an opaque failure).
 - Failed-validation and blocked attempts are logged server-side for tuning; thresholds are not hardcoded client-visible values.
 
@@ -232,7 +232,7 @@ POST /api/contact (validated input)
 | `CONTACT_FROM_NAME` | Sender display name (e.g., "Racheal Portfolio") | Optional but recommended |
 | `CONTACT_TO_EMAIL` | Racheal's receiving inbox | The delivery target |
 
-Optional, if set at implementation: `CONTACT_RATE_LIMIT_*` tuning values. No variable is hardcoded; **no placeholder credentials may ship** — the backend fails closed if required variables are absent at startup.
+Rate limiting is **compile-time, no environment variable** (window 60 s, max 10 / IP, 10,000-key sweep cap — see `backend/src/contact/rate-limit.ts`). **No placeholder credentials may ship** — the backend fails closed with `503 service_unavailable` at request time when `BREVO_API_KEY` / `CONTACT_*_EMAIL` are absent (verified in Phase 8 smoke; absent env vars are a request error, not a crash).
 
 ### Sender/domain verification requirements
 
@@ -275,7 +275,7 @@ Visitors may prefer a direct, immediate chat channel. A second contact channel �
 - Add **WhatsApp as a secondary direct-contact path** via a deep link (`https://wa.me/<number>`), rendered as a "Chat on WhatsApp" / "Chat with me" link/button.
 - **WhatsApp requires no backend** — it is a frontend-only deep link to a conversation with Racheal.
 - Treat it as a **secondary CTA**, never a competing primary conversion path. No intrusive floating widget.
-- The WhatsApp number is **real content from Racheal** (Phase 0 checklist — see `docs/content-model.md`). No placeholder may ship; the link is invalid until a verified number is supplied.
+- The WhatsApp number is **real content from Racheal** (Phase 8 supplied: `+2349152026763`, intl-digits form `2349152026763` for `wa.me`). No placeholder may ship; the link is invalid until a verified number is supplied. **As built (Phase 8):** number, CTA copy ("Chat on WhatsApp"), prefilled opener, and reply-timeline copy (`"Your message goes directly to Racheal. She typically replies within 1–2 business days."`) are supplied and verified; the deep link is `https://wa.me/2349152026763?text=<encoded>` with the approved generic prefilled message.
 
 ### UX / CTA hierarchy
 
@@ -287,9 +287,9 @@ Visitors may prefer a direct, immediate chat channel. A second contact channel �
 
 ### Prefilled message strategy (documented, not invented)
 
-- If a prefilled message is used (optional), it goes through `https://wa.me/<number>?text=<encoded>` with a short, **generic, non-personal** opener (e.g., a topic descriptor), defined with Racheal's copy approval during Phase 0.
-- Strategy: keep it short, generic, user-editable, and free of invented personal specifics — the visitor writes their own details.
-- If no approved copy exists, ship the **plain deep link with no preview text** rather than invent one.
+### Prefilled message strategy (implemented, not invented)
+
+- Prefill implemented through `https://wa.me/<number>?text=<encoded>` with a short, **generic, non-personal** opener, defined with Racheal's copy approval during Phase 8: **"Hi Racheal, I came across your portfolio and would like to discuss an opportunity with you."** The number never renders as plain text anywhere; only the `wa.me` deep link is exposed.
 
 ### Consequences
 

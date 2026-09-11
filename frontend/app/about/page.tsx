@@ -213,7 +213,10 @@ export default function AboutPage() {
             </dl>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <ButtonLink href="/work">See the work</ButtonLink>
-              <ButtonLink href={`mailto:${contact.email}`} variant="secondary">
+              <ButtonLink href="/resume" variant="secondary">
+                View resume
+              </ButtonLink>
+              <ButtonLink href={`mailto:${contact.email}`} variant="ghost">
                 Email me
               </ButtonLink>
             </div>

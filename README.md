@@ -4,12 +4,12 @@ Personal developer portfolio of **Olayode Racheal**: a static-first, evidence-le
 
 ## Status
 
-Phases 1–7 of the approved implementation plan are complete (`AGENTS.md` records the per-phase progress). The portfolio's main content surfaces are implemented and validated. **Phase 8 (contact form + backend) is next**, per `docs/implementation-plan.md`.
+Phases 1–8 of the approved implementation plan are complete (`AGENTS.md` records the per-phase progress). The portfolio's main content surfaces — including the **contact experience** (`/contact` with validated form + WhatsApp CTA) and its **backend `POST /api/contact`** — are implemented and validated. Phase 9 is next, per `docs/implementation-plan.md`.
 
 ## Stack
 
 - **Frontend:** Next.js 16 + TypeScript (App Router). Content is rendered statically from typed, repo-first data modules — no database, CMS, or content API in v1.
-- **Backend:** Node.js 22 + TypeScript, scaffolded and kept separate from the frontend. In v1 its only job will be the validated contact endpoint (email delivery through a swappable provider adapter).
+- **Backend:** Node.js 22 + TypeScript (native `node:http`, no framework), kept separate from the frontend. Its only job is the validated contact endpoint `POST /api/contact` — server-side validation, honeypot, sliding-window rate limiting, structured logging, and email delivery through a swappable provider adapter (`BrevoDelivery` in v1).
 
 ## Implemented sections
 
@@ -18,6 +18,7 @@ Phases 1–7 of the approved implementation plan are complete (`AGENTS.md` recor
 - **Case studies** (`/work/[slug]`) — SabiGet, Alafia, Lumora, MyGuestly AI.
 - **About** (`/about`) — journey, achievements, evidence-linked skills, working principles, recruiter facts.
 - **Writing** (`/writing`) — notes/articles index; internal post template at `/writing/[slug]`.
+- **Contact** (`/contact`) — role/build dual-path form (validated client + server side), "what happens next" reply promise, and a WhatsApp secondary CTA (also in the site footer).
 - Design-system foundation — token-driven light/dark themes, primitives + UI components, accessible navigation with a mobile menu, and a dev-only component review surface at `/components` (404 in production).
 
 Content is authored in typed source-of-truth modules under `frontend/lib/` (`home-content.ts`, `work-content.ts`, `about-content.ts`, `writing-content.ts`). Nothing is invented: material not yet supplied by the owner is omitted, never placeholder-shipped.
@@ -53,7 +54,7 @@ Backend (`backend/`):
 
 ```sh
 npm install
-npm run dev            # dev server (http://localhost:3001)
+npm run dev            # dev server (http://localhost:5010)
 npm run build          # tsc build
 npm run start          # run dist/server.js
 npm run lint
@@ -61,6 +62,9 @@ npm run typecheck
 npm test               # node --test
 npm run format:check
 ```
+
+Copy `backend/.env.example` → `backend/.env` and fill in real values; the `dev`/`start`
+scripts load `backend/.env` automatically (`--env-file-if-exists`).
 
 ## Environment
 
